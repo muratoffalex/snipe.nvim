@@ -42,6 +42,7 @@ H.default_config = {
     next_page = Config.navigate.next_page,
     prev_page = Config.navigate.prev_page,
   },
+  pagination = Config.ui.pagination,
 
   -- unset means no maximum
   max_height = Config.ui.max_height,
@@ -312,7 +313,7 @@ function Menu:get_window_opts(height, width)
     vim.notify("(snipe) unrecognized position", vim.log.levels.WARN)
   end
 
-  return vim.tbl_extend("keep", self.config.open_win_override, {
+  local window_opts = vim.tbl_extend("force", {
     title = "Snipe",
     anchor = anchor,
     border = "single",
@@ -323,7 +324,48 @@ function Menu:get_window_opts(height, width)
     width = width,
     height = height,
     zindex = 99,
-  })
+  }, self.config.open_win_override)
+
+  local total_items = #self.items
+  local _, max_page_size = H.get_page_info(total_items, self.config.max_height)
+  if total_items > max_page_size or self.config.pagination.always_show then
+    local start_item = (self.page - 1) * max_page_size + 1
+    local end_item = math.min(start_item + max_page_size - 1, total_items)
+    local total_pages = math.ceil(total_items / max_page_size)
+    local title = window_opts.title
+
+    local pagination = H.format_pagination(self.config.pagination.format, {
+      page = self.page,
+      total_pages = total_pages,
+      start_index = start_item,
+      end_index = end_item,
+      total_items = total_items,
+    })
+
+    -- Ensure the window is wide enough to fit the title and pagination
+    width = math.max(width, #title + #pagination + 1)
+
+    window_opts.width = width
+    local separator = self.config.pagination.separator
+    window_opts.title = {
+      { title },
+      { separator },
+      { pagination },
+    }
+  end
+
+  return window_opts
+end
+
+---Format pagination string using template from config
+---@param format string Template string
+---@param vars table Variables to replace in template
+---@return string
+H.format_pagination = function(format, vars)
+  local result = format:gsub("%%(.-)%%", function(var)
+    return vars[var] or ""
+  end)
+  return result
 end
 
 function Menu:update_window(height, width)
@@ -391,6 +433,7 @@ end
 H.create_default_hl = function()
   H.highlight_ns = vim.api.nvim_create_namespace("")
   vim.api.nvim_set_hl(H.highlight_ns, "SnipeHint", { link = "CursorLineNr" })
+  -- vim.api.nvim_set_hl(H.highlight_ns, "SnipePagination", { link = Config.ui.highlights.pagination })
 end
 
 H.clamp = function(val, min, max)

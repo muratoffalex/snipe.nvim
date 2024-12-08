@@ -29,6 +29,20 @@ M.defaults = {
     -- Can be "left", "right" or "file-first"
     -- NOTE: "file-first" buts the file name first and then the directory name
     text_align = "left",
+
+    pagination = {
+      always_show = false,
+      -- Allowed tokens: %page%, %total_pages%, %total_items%, %start_index%, %end_index%
+      -- %page% is the current page number
+      -- %total_pages% is the total number of pages
+      -- %total_items% is the total number of items in the list
+      -- %start_index% is the index of the first item in the current page
+      -- %end_index% is the index of the last item in the current page
+      -- Example: "[%start_index%-%end_index%/%total_items%]"
+      format = "%page%/%total_pages%",
+      -- Separator between title and pagination
+      separator = " ",
+    },
   },
   hints = {
     -- Charaters to use for hints (NOTE: make sure they don't collide with the navigation keymaps)
