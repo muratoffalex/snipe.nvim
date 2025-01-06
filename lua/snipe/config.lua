@@ -1,6 +1,13 @@
 ---@class snipe.Config: snipe.DefaultConfig
 local M = {}
 
+---@class snipe.PaginationVars
+---@field page number Current page number
+---@field total_pages number Total number of pages
+---@field total_items number Total number of items in the list
+---@field start_index number Index of the first item in the current page
+---@field end_index number Index of the last item in the current page
+
 ---@class snipe.DefaultConfig
 M.defaults = {
   ui = {
@@ -32,14 +39,12 @@ M.defaults = {
 
     pagination = {
       always_show = false,
-      -- Allowed tokens: %page%, %total_pages%, %total_items%, %start_index%, %end_index%
-      -- %page% is the current page number
-      -- %total_pages% is the total number of pages
-      -- %total_items% is the total number of items in the list
-      -- %start_index% is the index of the first item in the current page
-      -- %end_index% is the index of the last item in the current page
-      -- Example: "[%start_index%-%end_index%/%total_items%]"
-      format = "%page%/%total_pages%",
+      ---Format function for pagination
+      ---@param vars snipe.PaginationVars
+      ---@return string
+      format = function(vars)
+        return string.format("%d/%d", vars.page, vars.total_pages)
+      end,
       -- Separator between title and pagination
       separator = " ",
     },

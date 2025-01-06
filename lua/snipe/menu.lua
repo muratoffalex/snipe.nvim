@@ -334,7 +334,7 @@ function Menu:get_window_opts(height, width)
     local total_pages = math.ceil(total_items / max_page_size)
     local title = window_opts.title
 
-    local pagination = H.format_pagination(self.config.pagination.format, {
+    local pagination = self.config.pagination.format({
       page = self.page,
       total_pages = total_pages,
       start_index = start_item,
@@ -355,17 +355,6 @@ function Menu:get_window_opts(height, width)
   end
 
   return window_opts
-end
-
----Format pagination string using template from config
----@param format string Template string
----@param vars table Variables to replace in template
----@return string
-H.format_pagination = function(format, vars)
-  local result = format:gsub("%%(.-)%%", function(var)
-    return vars[var] or ""
-  end)
-  return result
 end
 
 function Menu:update_window(height, width)
